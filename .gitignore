@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Data
+data/*
+!data/.gitkeep
+*.csv
+*.parquet
+
+# Spark/Delta
+metastore_db/
+spark-warehouse/
+derby.log
+
+# Env secrets
+.env
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
