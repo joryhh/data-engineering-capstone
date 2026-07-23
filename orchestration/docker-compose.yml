@@ -1,0 +1,15 @@
+services:
+  airflow:
+    build: .
+    container_name: capstone-airflow
+    command: standalone
+    ports:
+      - "8080:8080"
+    environment:
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ../lakehouse:/opt/airflow/lakehouse
+      - ../quality_lineage:/opt/airflow/quality_lineage
+      - ../venv:/opt/airflow/project_venv
+      - ../data:/opt/airflow/data

@@ -1,3 +1,4 @@
+from pathlib import Path
 import shutil
 from pathlib import Path
 
@@ -7,7 +8,7 @@ from pyspark.sql.types import (
     StructType, StructField, StringType, DoubleType, IntegerType
 )
 
-BRONZE_PATH = "./data/delta/bronze_orders"
+BRONZE_PATH = str(Path(__file__).resolve().parent.parent / "data" / "delta" / "bronze_orders")
 
 # Same raw data shape as the Kafka producer sent — including a late-arriving
 # duplicate order_id (ORD001) to prove MERGE/upsert logic later in Silver.

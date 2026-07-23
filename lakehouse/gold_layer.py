@@ -1,9 +1,10 @@
+from pathlib import Path
 from delta import configure_spark_with_delta_pip
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 
-SILVER_PATH = "./data/delta/silver_orders"
-GOLD_PATH   = "./data/delta/gold_product_summary"
+SILVER_PATH = str(Path(__file__).resolve().parent.parent / "data" / "delta" / "silver_orders")
+GOLD_PATH   = str(Path(__file__).resolve().parent.parent / "data" / "delta" / "gold_product_summary")
 
 
 def create_spark_session() -> SparkSession:

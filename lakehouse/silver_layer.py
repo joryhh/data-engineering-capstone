@@ -1,3 +1,4 @@
+from pathlib import Path
 from delta import configure_spark_with_delta_pip
 from delta.tables import DeltaTable
 from pyspark.sql import SparkSession
@@ -5,8 +6,8 @@ from pyspark.sql.types import (
     StructType, StructField, StringType, DoubleType, IntegerType
 )
 
-BRONZE_PATH = "./data/delta/bronze_orders"
-SILVER_PATH = "./data/delta/silver_orders"
+BRONZE_PATH = str(Path(__file__).resolve().parent.parent / "data" / "delta" / "bronze_orders")
+SILVER_PATH = str(Path(__file__).resolve().parent.parent / "data" / "delta" / "silver_orders")
 
 # Simulates a late-arriving UPDATE for ORD001 (quantity corrected 1 -> 3)
 # plus one brand-new order — proves MERGE handles both update AND insert.
