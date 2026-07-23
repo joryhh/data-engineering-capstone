@@ -1,4 +1,3 @@
-# data-engineering-capstone
 Student: Jory Alhassan
 
 Program: SDAIA Academy — Modern Data Engineering for AI Systems
@@ -27,9 +26,29 @@ semantic search instead of picking one, an Airflow DAG that stops the
 pipeline if data quality checks fail, and OpenLineage tracking so you can see
 what ran and what didn't.
 
-## How it's organized
+## Pipeline Architecture
 
--## How it's organized
+```
+Kafka Producer (Pydantic-validated) ──▶ Kafka Topic ──▶ Kafka Consumer
+                                                              │
+                                                              ▼
+                                    Bronze (raw) ──▶ Silver (MERGE/upsert)
+                                                              │
+                                                              ▼
+                                              Great Expectations Quality Gate
+                                                              │
+                                              (gate must pass, or Airflow halts)
+                                                              │
+                                                    Gold (aggregated KPIs)
+
+Airflow DAG wires: bronze_layer >> silver_layer >> quality_gate >> gold_layer
+
+Separately: RAG pipeline (chunking → ChromaDB + BM25 hybrid search with RRF
+→ cross-encoder rerank → Groq LLM grounded answer with citations) answers
+customer-support questions from a small knowledge base.
+```
+
+## How it's organized
 
 ```
 data-engineering-capstone/
@@ -40,6 +59,7 @@ data-engineering-capstone/
 ├── quality_lineage/    # Great Expectations gate + OpenLineage events
 └── docs/               # Extra notes on how the pieces fit together
 ```
+
 ## Running it
 
 You'll need Docker Desktop, Python 3.11, Java 17 (PySpark needs it), and a
@@ -87,6 +107,34 @@ Then go to localhost:8080, log in as admin (password is generated on
 first run — check with `docker exec capstone-airflow cat /opt/airflow/standalone_admin_password.txt`),
 and trigger `wafra_capstone_pipeline`. If `quality_gate` fails, `gold_layer`
 won't run — that's intentional.
+
+## Sample Results
+
+**Ingestion:** 2 out of 5 sample orders accepted and sent to Kafka; 3 rejected
+and written to `quarantine.jsonl` with reasons (empty product, negative price,
+negative quantity).
+
+**Lakehouse:** Bronze lands 4 raw rows. Silver's MERGE updates one existing
+order (quantity 1 → 3) and inserts one new order, ending at 5 rows total — no
+duplicates. Gold produces one aggregated row per product (revenue, units
+sold, order count, avg price). The schema-enforcement script ends with Delta
+explicitly rejecting a mismatched write.
+
+**RAG:** A question like "How do I get a refund on my Mada card?" returns a
+grounded answer citing the exact source chunk, e.g.:
+> Refunds to Mada cards may take up to 10 business days to appear.
+> [Source: doc4.txt_chunk1]
+
+**Quality Gate:** 5/5 checks pass on clean Silver data. The failure-proof
+script deliberately feeds bad data (duplicate ID, negative price, null
+product) and shows 3 of the 5 checks correctly failing.
+
+**Lineage:** START/COMPLETE events for a successful stage, and START/FAIL
+events for a stage that raises an exception — both printed to the console.
+
+**Airflow:** Triggering `wafra_capstone_pipeline` runs all 4 tasks
+(`bronze_layer → silver_layer → quality_gate → gold_layer`) to `success` in
+sequence. If `quality_gate` fails, `gold_layer` is never scheduled.
 
 ## A note on one design choice
 
