@@ -1,0 +1,1 @@
+Payment Methods: We accept Mada, Visa, Mastercard, Apple Pay, and STC Pay. Cash on delivery is available for orders under 500 SAR within major cities. All online payments are processed through a PCI-DSS compliant payment gateway. Refunds to Mada cards may take up to 10 business days to appear.

@@ -1,0 +1,1 @@
+Inventory Management: Small retailers should reorder stock when inventory falls below 20% of average monthly sales. Fast-moving items should be reviewed weekly, while slow-moving items can be reviewed monthly. Seasonal products require adjusted reorder points during peak demand periods like Ramadan and back-to-school season.
